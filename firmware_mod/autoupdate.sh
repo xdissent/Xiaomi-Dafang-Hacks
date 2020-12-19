@@ -253,6 +253,7 @@ action "rm -rf ${DESTOVERRIDE} 2>/dev/null"
 if [ -f "$VERSION_FILE" ]; then
     LOCALCOMMITID=$(${JQ} -r .commit ${VERSION_FILE})
     LOCALREPO=$(${JQ} -r .repo ${VERSION_FILE})
+    if [ -z "$LOCALREPO" ]; then LOCALREPO="$REPO"; fi
     if [ ${LOCALREPO} = ${REPO} ] && [ ${LOCALCOMMITID} = ${REMOTECOMMITID} ]; then
         logerror "You are currently on the latest version"
         echo "You are currently on the latest version"
@@ -300,10 +301,10 @@ do
     fi
     # sometimes zero byte files are received, which overwrite the local files, we ignore those files
     # exception: files that are hidden i.e. start with dot. Ex: files like ".gitkeep"
-    if [[ ! -s ${TMPFILE} ]] && [[ $(basename ${LOCALFILE} | cut -c1-1) != "." ]]; then                
-        echo "Received zero byte file $i, exiting."                                                    
-        exit 1                                                                                         
-    fi         
+    if [[ ! -s ${TMPFILE} ]] && [[ $(basename ${LOCALFILE} | cut -c1-1) != "." ]]; then
+        echo "Received zero byte file $i, exiting."
+        exit 1
+    fi
     # Check the file exists in local
     if [ -f "${DESTFOLDER}/${LOCALFILE}" ]; then
         REMOTESHA=$(${SHA} ${TMPFILE} 2>/dev/null | cut -d "=" -f 2)
