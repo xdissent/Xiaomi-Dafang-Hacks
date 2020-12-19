@@ -533,10 +533,14 @@ auto_night_mode_status)
 
   update)
 	  processId=$(ps | grep autoupdate.sh | grep -v grep)
-	  release=""
-	  if [ $F_release == "beta" ]; then
-		release="-r beta"
-	  fi
+    repo=$(printf '%b' "${F_repo//%/\\x}")
+    if [ -n "$repo" ]; then
+      repo="-x $repo"
+    fi
+    release=$(printf '%b' "${F_release//%/\\x}")
+    if [ -n "$release" ]; then
+      release="-r $release"
+    fi
 	  if [ $F_mode == "full" ]; then
 		mv /system/sdcard/VERSION /system/sdcard/VERSION.old
 	  fi
@@ -544,9 +548,9 @@ auto_night_mode_status)
 		  echo "===============" >> /system/sdcard/log/update.log
 		  date >> /var/log/update.log
 		  if [ "$F_login" != "" ]; then
-			  /system/sdcard/bin/busybox nohup /system/sdcard/autoupdate.sh -s -v -f ${release} -u $F_login >> "/system/sdcard/log/update.log" &
+			  /system/sdcard/bin/busybox nohup /system/sdcard/autoupdate.sh -s -v -f ${repo} ${release} -u $F_login >> "/system/sdcard/log/update.log" &
 		  else
-			  /system/sdcard/bin/busybox nohup /system/sdcard/autoupdate.sh -s -v -f ${release} >> "/system/sdcard/log/update.log" &
+			  /system/sdcard/bin/busybox nohup /system/sdcard/autoupdate.sh -s -v -f ${repo} ${release} >> "/system/sdcard/log/update.log" &
 		  fi
 		  processId=$(ps | grep autoupdate.sh | grep -v grep)
 	  fi
@@ -706,7 +710,7 @@ motion_detection_mqtt_snapshot_status)
 			echo "${localrepo}:${localbranch}:${commitbehind}"
 		  fi
 		else
-		  echo "null:-1"
+		  echo "null:null:-1"
 		fi
 		return
 		;;
